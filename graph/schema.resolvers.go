@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/kapralovs/graphql-service/graph/data"
 	"github.com/kapralovs/graphql-service/graph/generated"
 	"github.com/kapralovs/graphql-service/graph/model"
+	_ "github.com/lib/pq"
 )
 
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
@@ -19,11 +21,14 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 		User: &model.User{ID: input.UserID, Name: "user " + input.UserID},
 	}
 	r.todos = append(r.todos, todo)
-	return todo, nil
 
+	data.AddToDB(todo)
+
+	return todo, nil
 }
 
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
+	data.GetFromDB()
 	return r.todos, nil
 }
 
